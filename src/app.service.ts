@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Connection } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Injectable()
 export class MongoService implements OnModuleInit {
