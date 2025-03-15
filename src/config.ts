@@ -9,7 +9,7 @@ class Config {
   
 
   constructor() {
-    this.MONGO_URL = process.env.JWT_TOKEN || '';
+    this.MONGO_URL = process.env.MONGO_URL || '';
   }
 }
 
