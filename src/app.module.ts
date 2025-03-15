@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
-import { MongoService } from './app.service';
-import { UsersModule } from './users/user.module';
+import { User, UserSchema } from './schemas/user.schema';
+import { UsersService } from './users/user.service';
+import { UserController } from './users/user.controller';
+
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://hault2003:hault2003@chat.yqjir.mongodb.net/Db',
-    ),
-    UsersModule,
+    ConfigModule.forRoot(), 
+    MongooseModule.forRoot(`${process.env.MONGO_URL}`), 
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  controllers: [AppController],
-  providers: [MongoService],
+  controllers: [UserController],
+  providers: [UsersService],
 })
 export class AppModule {}
