@@ -1,7 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { Model } from 'mongoose';
+import { ErrorType, Exception } from 'src/errors';
 import { User, UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from './create-user.dto';
 
@@ -17,7 +18,10 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new BadRequestException('Username or Email already exists');
+      throw Exception.HTTPException(
+        ErrorType.BAD_REQUEST,
+        'User already exists',
+      );
     }
 
     // Hash password
@@ -34,6 +38,6 @@ export class UsersService {
   }
 
   async getUsers(): Promise<User[]> {
-    return this.userModel.find().select('-password'); 
+    return this.userModel.find().select('-password');
   }
 }
