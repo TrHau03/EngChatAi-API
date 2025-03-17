@@ -33,6 +33,20 @@ export class AuthController {
 
     return { access_token, refresh_token };
   }
+  @Post('google-login')
+  async googleLogin(@Body('token') token: string) {
+    const decodedToken = await this.authService.verifyToken(token);
+
+    const payload = {
+        uid: decodedToken.uid,
+        email: decodedToken.email || 'no-email@example.com',
+        name: decodedToken.displayName || decodedToken.email || 'Unknown User', 
+        picture: decodedToken.picture || null, 
+    };
+
+    const jwt = this.authService.generateJwt(payload);
+    return { jwt, user: payload };
+  }
 
   // @UseGuards(AuthGuard)
   // @Get('profile')
