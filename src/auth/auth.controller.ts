@@ -14,7 +14,7 @@ export class AuthController {
     const payload = {
         uid: decodedToken.uid,
         email: decodedToken.email || 'no-email@example.com',
-        name: decodedToken.displayName || decodedToken.email || 'Unknown User', // Sửa `name` -> `displayName`
+        name: decodedToken.displayName || decodedToken.email || 'Unknown User', 
         picture: decodedToken.picture || null, 
     };
 
