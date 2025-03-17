@@ -1,3 +1,3 @@
-export class ChatRequest {
+export class ChatRequestDTO {
   ownerId: string;
 }
