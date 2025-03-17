@@ -5,14 +5,17 @@ import { ChatController } from './modules/chat/chat.controller';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserController } from './modules/users/user.controller';
 import { UsersModule } from './modules/users/user.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
   imports: [
     MongooseModule.forRoot(`${config.MONGO_URL}`),
     ChatModule,
     UsersModule,
+    AuthModule
   ],
-  controllers: [UserController, ChatController],
+  controllers: [UserController, ChatController,AuthController],
   providers: [],
 })
 export class AppModule {}

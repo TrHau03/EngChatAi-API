@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { JwtService } from '@nestjs/jwt';
