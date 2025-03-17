@@ -1,4 +1,18 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  GatewayTimeoutException,
+  GoneException,
+  InternalServerErrorException,
+  NotAcceptableException,
+  NotFoundException,
+  PayloadTooLargeException,
+  RequestTimeoutException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 export enum ErrorType {
   BAD_REQUEST = 'BAD_REQUEST',
@@ -7,7 +21,7 @@ export enum ErrorType {
   FORBIDDEN = 'FORBIDDEN',
   CONFLICT = 'CONFLICT',
   NOT_ACCEPTABLE = 'NOT_ACCEPTABLE',
-  TIMEOUT = 'TIMEOUT',
+  REQUEST_TIMEOUT = 'REQUEST_TIMEOUT',
   GONE = 'GONE',
   PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
   INTERNAL_SERVER = 'INTERNAL_SERVER',
@@ -24,27 +38,27 @@ export class Exception {
       case ErrorType.UNAUTHORIZED:
         throw new UnauthorizedException(message);
       case ErrorType.NOT_FOUND:
-        throw new BadRequestException(message);
+        throw new NotFoundException(message);
       case ErrorType.FORBIDDEN:
-        throw new BadRequestException(message);
+        throw new ForbiddenException(message);
       case ErrorType.CONFLICT:
-        throw new BadRequestException(message);
+        throw new ConflictException(message);
       case ErrorType.NOT_ACCEPTABLE:
-        throw new BadRequestException(message);
-      case ErrorType.TIMEOUT:
-        throw new BadRequestException(message);
+        throw new NotAcceptableException(message);
+      case ErrorType.REQUEST_TIMEOUT:
+        throw new RequestTimeoutException(message);
       case ErrorType.GONE:
-        throw new BadRequestException(message);
+        throw new GoneException(message);
       case ErrorType.PAYLOAD_TOO_LARGE:
-        throw new BadRequestException(message);
+        throw new PayloadTooLargeException(message);
       case ErrorType.INTERNAL_SERVER:
-        throw new BadRequestException(message);
+        throw new InternalServerErrorException(message);
       case ErrorType.BAD_GATEWAY:
-        throw new BadRequestException(message);
+        throw new BadGatewayException(message);
       case ErrorType.SERVICE_UNAVAILABLE:
-        throw new BadRequestException(message);
+        throw new ServiceUnavailableException(message);
       case ErrorType.GATEWAY_TIMEOUT:
-        throw new BadRequestException(message);
+        throw new GatewayTimeoutException(message);
       default:
         throw new BadRequestException(message);
     }

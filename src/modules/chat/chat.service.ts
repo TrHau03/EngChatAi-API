@@ -11,4 +11,9 @@ export class ChatService {
       return this.chatModel.findOne({ ownerId });
     } catch (error) {}
   }
+  updateChatById(ownerId: string, messages: string) {
+    try {
+      return this.chatModel.findOneAndUpdate({ ownerId }, { messages });
+    } catch (error) {}
+  }
 }
