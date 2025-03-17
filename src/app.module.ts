@@ -1,24 +1,18 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';  // 
-import { AuthModule } from './auth/auth.module';
-import { UsersService } from './users/user.service';
-import { UserController } from './users/user.controller';
-import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
-import { User, UserSchema } from './schemas/user.schema';
 import { config } from './config';
-import { ChatController } from './chat/chat.controller';
-import { ChatModule } from './chat/chat.module';
+import { ChatController } from './modules/chat/chat.controller';
+import { ChatModule } from './modules/chat/chat.module';
+import { UserController } from './modules/users/user.controller';
+import { UsersModule } from './modules/users/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),  // ✅ Load biến môi trường từ .env
-    MongooseModule.forRoot(`${config.MONGO_URL}`), 
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), ChatModule,
-    AuthModule
+    MongooseModule.forRoot(`${config.MONGO_URL}`),
+    ChatModule,
+    UsersModule,
   ],
-  controllers: [UserController, ChatController,AuthController],
-  providers: [UsersService,AuthService],
+  controllers: [UserController, ChatController],
+  providers: [],
 })
 export class AppModule {}

@@ -1,9 +1,6 @@
 import * as dotenv from 'dotenv';
 
-
 dotenv.config({});
-
-
 
 class Config {
   public MONGO_URL: string | undefined;

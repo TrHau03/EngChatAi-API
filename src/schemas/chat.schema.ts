@@ -5,9 +5,6 @@ export type ChatDocument = Chat & Document;
 
 @Schema()
 export class Chat {
-  @Prop({ required: true, unique: true })
-  _id: string;
-
   @Prop({ required: true })
   ownerId: string;
 
