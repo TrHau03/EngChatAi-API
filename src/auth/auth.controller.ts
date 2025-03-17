@@ -1,12 +1,10 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service'; 
-import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private jwtService: JwtService
+    private authService: AuthService
   ) {}
 
   @Post('google-login')
@@ -16,7 +14,7 @@ export class AuthController {
     const payload = {
         uid: decodedToken.uid,
         email: decodedToken.email || 'no-email@example.com',
-        name: decodedToken.displayName || decodedToken.email || 'Unknown User', // Sửa `name` -> `displayName`
+        name: decodedToken.displayName || decodedToken.email || 'Unknown User',
         picture: decodedToken.picture || null, 
     };
 
