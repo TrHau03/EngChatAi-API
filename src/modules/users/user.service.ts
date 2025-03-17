@@ -40,4 +40,8 @@ export class UsersService {
   async getUsers(): Promise<User[]> {
     return this.userModel.find().select('-password');
   }
+
+  async findOneByUsername(username: string): Promise<User | null> {
+    return this.userModel.findOne({ username }).exec();
+  }
 }
