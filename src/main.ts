@@ -7,8 +7,8 @@ var service = require('../engchatai-553acda6f7d4.json');
 
 async function bootstrap() {
   initializeApp({
-    projectId: 'engchatai-8d022',
-    serviceAccountId: 'engchatai@engchatai.iam.gserviceaccount.com',
+    projectId: process.env.PROJECT_ID,
+    serviceAccountId: process.env.SERVICE_ACCOUNT,
     credential: admin.credential.cert(service),
   });
   const app = await NestFactory.create(AppModule);
