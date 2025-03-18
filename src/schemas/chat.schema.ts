@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Message } from 'src/entities/message';
 
 export type ChatDocument = Chat & Document;
 
@@ -9,7 +10,9 @@ export class Chat {
   ownerId: string;
 
   @Prop()
-  messages: string;
+  data: {
+    messages: Message[];
+  }[];
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);

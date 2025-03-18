@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
+import { ChatUpdateRequestDTO } from './dto/chat';
 
 @Controller('chat')
 export class ChatController {
@@ -11,11 +12,13 @@ export class ChatController {
     } catch (error) {}
   }
 
-  @Patch('updateChat/:ownerId')
-  updateChat(@Param('ownerId') ownerId: string) {
+  @Post('chatUpdate/:ownerId')
+  chatUpdate(
+    @Param('ownerId') ownerId: string,
+    @Body() body: ChatUpdateRequestDTO,
+  ) {
     try {
-      // return this.chatService.updateChatById(ownerId, {});
-      return;
+      return this.chatService.updateChatById(ownerId, body);
     } catch (error) {}
   }
 }
