@@ -34,11 +34,11 @@ export class AuthService {
     }
   }
 
-  async verifyToken(idToken: string) {
-    console.log('🔍 Token nhận được:', idToken);
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    return decodedToken;
-  }
+  // async verifyToken(idToken: string) {
+  //   console.log('🔍 Token nhận được:', idToken);
+  //   const decodedToken = await admin.auth().verifyIdToken(idToken);
+  //   return decodedToken;
+  // }
 
   async signIn({ username, password }: { username: string; password: string }) {
     const user = await this.usersService.validateUser(username, password);
@@ -74,8 +74,6 @@ export class AuthService {
         const payload = await this.jwtService.verifyAsync(refreshToken, {
             secret: config.JWT_REFRESH_SECRET,
         });
-
-        // Tạo access token mới có username
         const newAccessToken = this.jwtService.sign(
             { sub: payload.sub, username: payload.username }, 
             { secret: config.JWT_SECRET, expiresIn: '60s' }
@@ -87,7 +85,7 @@ export class AuthService {
     }
 }
 
-  generateJwt(payload: { uid: string; email: string; name: string }) {
-    return this.jwtService.sign(payload);
-  }
+  // generateJwt(payload: { uid: string; email: string; name: string }) {
+  //   return this.jwtService.sign(payload);
+  // }
 }
