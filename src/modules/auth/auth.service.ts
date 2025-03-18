@@ -14,4 +14,16 @@ export class AuthService {
       return '';
     }
   }
+
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      console.log(token);
+
+      const decodedToken = await auth().verifyIdToken(token);
+      console.log(decodedToken);
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

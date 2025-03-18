@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { AppModule } from './app.module';
-var service = require('../engchatai-553acda6f7d4.json');
+var service = require('../engchatai-service.json');
 
 async function bootstrap() {
   initializeApp({

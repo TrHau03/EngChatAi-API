@@ -1,4 +1,5 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -10,6 +11,14 @@ export class AuthController {
     try {
       const token = await this.authService.createToken();
       return token;
+    } catch (error) {}
+  }
+
+  @Post('verify')
+  @UseGuards(AuthGuard)
+  async verifyUser() {
+    try {
+      return true;
     } catch (error) {}
   }
 }
