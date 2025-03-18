@@ -5,8 +5,8 @@ import { ChatController } from './modules/chat/chat.controller';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserController } from './modules/users/user.controller';
 import { UsersModule } from './modules/users/user.module';
-import { AuthModule } from './auth/auth.module';
-import { AuthController } from './auth/auth.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import { AuthController } from './modules/auth/auth.controller';
 
 @Module({
   imports: [

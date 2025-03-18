@@ -36,7 +36,18 @@ export class UsersService {
 
     return newUser.save();
   }
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ username });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
+    }
+    return null;
+  }
 
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashedToken = await bcrypt.hash(refreshToken, 10); // Mã hóa token
+    await this.userModel.updateOne({ _id: userId }, { refreshToken: hashedToken });
+  }
   async getUsers(): Promise<User[]> {
     return this.userModel.find().select('-password');
   }
@@ -44,4 +55,5 @@ export class UsersService {
   async findOneByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username }).exec();
   }
+
 }
