@@ -45,7 +45,7 @@ export class UsersService {
   }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashedToken = await bcrypt.hash(refreshToken, 10); // Mã hóa token
+    const hashedToken = await bcrypt.hash(refreshToken, 10); 
     await this.userModel.updateOne({ _id: userId }, { refreshToken: hashedToken });
   }
   async getUsers(): Promise<User[]> {

@@ -29,20 +29,6 @@ export class AuthController {
 async refresh(@Body('refresh_token') refreshToken: string) {
     return this.authService.refreshToken(refreshToken);
 }
-// @Post('firebase-login')
-//   async firebaselogin(@Body('token') token: string) {
-//     const decodedToken = await this.authService.verifyToken(token);
-
-//     const payload = {
-//         uid: decodedToken.uid,
-//         email: decodedToken.email || 'no-email@example.com',
-//         name: decodedToken.displayName || decodedToken.email || 'Unknown User', 
-//         picture: decodedToken.picture || null, 
-//     };
-
-//     const jwt = this.authService.generateJwt(payload);
-//     return { jwt, user: payload };
-//   }
 
 @UseGuards(AuthGuard)
 @Get('profile')
