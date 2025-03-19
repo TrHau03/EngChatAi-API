@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { config } from 'src/config';
 import { UsersService } from '../users/user.service';
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -16,12 +15,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const access_token = this.generateAccessToken(user._id, user.username);
-    const refresh_token = this.generateRefreshToken(user._id, user.username);
+    // const access_token = this.generateAccessToken(user._id, user.username);
+    // const refresh_token = this.generateRefreshToken(user._id, user.username);
 
-    await this.usersService.updateRefreshToken(user._id, refresh_token);
+    // await this.usersService.updateRefreshToken(user._id, refresh_token);
 
-    return { access_token, refresh_token };
+    // return { access_token, refresh_token };
   }
 
   generateAccessToken(userId: string, username: string): string {
