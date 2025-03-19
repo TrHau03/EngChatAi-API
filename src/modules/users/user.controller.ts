@@ -11,7 +11,7 @@ export class UserController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
-
+  @Public()
   @Get('/info')
   async getUsers() {
     return this.usersService.getUsers();
