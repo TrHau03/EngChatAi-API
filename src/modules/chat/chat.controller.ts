@@ -1,24 +1,23 @@
-import { 
-  Body, 
-  Controller, 
-  Get, 
-  Param, 
-  Post, 
-  Delete, 
-  HttpStatus 
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
+import { Public } from 'src/decorator/public.decorator';
+import { AuthGuard } from '../auth/auth.guard';
 import { ChatService } from './chat.service';
 import { ChatUpdateRequestDTO } from './dto/chat';
-import { Public } from 'src/decorator/public.decorator';
 
 @Controller('chat')
 export class ChatController {
   constructor(private chatService: ChatService) {}
-  @Public()
-  @Post('create/:ownerId')
-  async createChat(@Param('ownerId') ownerId: string) {
-  return this.chatService.createChat(ownerId);
-  }
+
+  @UseGuards(AuthGuard)
   @Public()
   @Get('getChat/:ownerId')
   async getChatById(@Param('ownerId') ownerId: string) {
@@ -42,7 +41,10 @@ export class ChatController {
   }
   @Public()
   @Delete('deletemsg/:ownerId/message/:messageId')
-  async deleteMessage(@Param('ownerId') ownerId: string,@Param('messageId') messageId: string,) {
+  async deleteMessage(
+    @Param('ownerId') ownerId: string,
+    @Param('messageId') messageId: string,
+  ) {
     return this.chatService.deleteMessageById(ownerId, messageId);
-}
+  }
 }

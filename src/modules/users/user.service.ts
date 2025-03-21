@@ -1,59 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { ErrorCode, ErrorType, Exception } from 'src/errors';
 import { User, UserDocument } from '../../schemas/user.schema';
-import { CreateUserDto } from './create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { username, email, password } = createUserDto;
-
-    const existingUser = await this.userModel.findOne({
-      $or: [{ username }, { email }],
-    });
-
-    if (existingUser) {
-      throw Exception.HTTPException(
-        ErrorType.BAD_REQUEST,
-        ErrorCode.BAD_REQUEST,
-      );
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const newUser = new this.userModel({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    return newUser.save();
-  }
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.userModel.findOne({ username });
-    if (user && (await bcrypt.compare(password, user.password))) {
+  async createUser(email: string) {
+    try {
+      const user = await this.userModel.create({ email });
+      await user.save();
       return user;
+    } catch (error) {
+      throw new Error('Create user error');
     }
-    return null;
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashedToken = await bcrypt.hash(refreshToken, 10); 
-    await this.userModel.updateOne({ _id: userId }, { refreshToken: hashedToken });
+  async findUserByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await this.userModel.findOne({ email }).exec();
+      return user;
+    } catch (error) {
+      return null;
+    }
   }
-  async getUsers(): Promise<User[]> {
-    return this.userModel.find().select('-password');
-  }
-
-  async findOneByUsername(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username }).exec();
-  }
-
 }

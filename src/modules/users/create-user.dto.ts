@@ -1,14 +1,6 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsString } from 'class-validator';
 
-export class CreateUserDto {
-  @IsNotEmpty()
+export class SignIndDTO {
   @IsString()
-  username: string;
-
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
-  @MinLength(6)
-  password: string;
+  idToken: string;
 }

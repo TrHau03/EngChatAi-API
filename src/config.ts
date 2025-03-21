@@ -12,7 +12,6 @@ class Config {
     this.MONGO_URL = process.env.MONGO_URL || '';
     this.FIREBASE_CREDENTIALS = process.env.FIREBASE_CREDENTIALS || '';
     this.JWT_SECRET = process.env.JWT_SECRET || '';
-    this.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || '';
   }
 }
 
