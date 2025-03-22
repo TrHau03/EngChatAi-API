@@ -11,7 +11,6 @@ export class AppGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    console.log({ token });
 
     if (!token) {
       throw Exception.HTTPException(
@@ -24,8 +23,6 @@ export class AppGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: config.JWT_SECRET,
       });
-      console.log({ payload });
-
       request['user'] = payload;
     } catch (error) {
       console.log({ error });

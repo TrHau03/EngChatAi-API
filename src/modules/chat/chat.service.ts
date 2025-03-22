@@ -1,68 +1,54 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { ErrorCode, ErrorType } from 'src/errors';
 import { Chat, ChatDocument } from 'src/schemas/chat.schema';
-import { ChatUpdateRequestDTO } from './dto/chat';
-import { ErrorCode } from 'src/errors';
+import { ChatResponseDTO, ChatUpdateRequestDTO } from './dto/chat';
 
 @Injectable()
 export class ChatService {
   constructor(@InjectModel(Chat.name) private chatModel: Model<ChatDocument>) {}
 
-  async createChat(ownerId: string) {
+  async getChat(email: string): Promise<ChatResponseDTO> {
     try {
-      const existingChat = await this.chatModel.findOne({ ownerId });
-      if (existingChat) {
-        throw new HttpException(
-          { statusCode: HttpStatus.CONFLICT, message: ErrorCode.CONFLICT },
-          HttpStatus.CONFLICT,
-        );
+      const chat = await this.chatModel.findOne({ email });
+      if (!chat) {
+        const newChat = new this.chatModel({ email, data: [] });
+        await newChat.save();
+        return newChat;
       }
-  
-      const newChat = new this.chatModel({ ownerId, data: [] });
-      await newChat.save();
-  
-      return { message: 'Chat created successfully', chat: newChat };
+      return chat;
     } catch (error) {
-      console.error('Error creating chat:', error);
-      throw new HttpException(
-        { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: ErrorCode.INTERNAL_SERVER },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.log(error);
+      throw new HttpException(ErrorType.BAD_GATEWAY, ErrorCode.BAD_GATEWAY);
     }
-  }
-  
-  async getChatById(ownerId: string) {
-    const chat = await this.chatModel.findOne({ ownerId });
-    if (!chat) {
-      throw new HttpException(
-        { statusCode: HttpStatus.NOT_FOUND, message: ErrorCode.NOT_FOUND },
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    return chat;
   }
 
-  async updateChatById(ownerId: string, { messages }: ChatUpdateRequestDTO) {
+  async updateChatById(
+    ownerId: string,
+    { messages }: ChatUpdateRequestDTO,
+  ): Promise<ChatUpdateRequestDTO> {
     try {
-      
-      const updatedMessages = messages.map(msg => ({
+      const updatedMessages = messages.map((msg) => ({
         ...msg,
-        _id: new Types.ObjectId(), 
-        created_at: msg.created_at || new Date() 
+        _id: new Types.ObjectId(),
+        created_at: msg.created_at || new Date(),
       }));
-  
+
       const chat = await this.chatModel.findOneAndUpdate(
         { ownerId },
         { $push: { messages: { $each: updatedMessages } } },
-        { new: true, upsert: true }
+        { new: true, upsert: true },
       );
-  
+
       return chat;
     } catch (error) {
       console.error('Error updating chat:', error);
       throw new HttpException(
-        { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: ErrorCode.INTERNAL_SERVER },
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: ErrorCode.INTERNAL_SERVER,
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -83,24 +69,26 @@ export class ChatService {
       const chat = await this.chatModel.findOneAndUpdate(
         { ownerId },
         { $pull: { messages: { _id: new Types.ObjectId(messageId) } } },
-        { new: true } 
+        { new: true },
       );
-  
+
       if (!chat) {
         throw new HttpException(
           { statusCode: HttpStatus.NOT_FOUND, message: ErrorCode.NOT_FOUND },
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       return { message: 'Message deleted successfully', chat };
     } catch (error) {
       console.error('Error deleting message:', error);
       throw new HttpException(
-        { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: ErrorCode.INTERNAL_SERVER },
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: ErrorCode.INTERNAL_SERVER,
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-  
 }

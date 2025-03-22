@@ -6,23 +6,35 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { Public } from 'src/decorator/public.decorator';
+import { ErrorCode, ErrorType, Exception } from 'src/errors';
 import { AppGuard } from 'src/guards/app.guard';
 import { ChatService } from './chat.service';
-import { ChatUpdateRequestDTO } from './dto/chat';
+import { ChatResponseDTO, ChatUpdateRequestDTO } from './dto/chat';
 
 @Controller('chat')
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
   @UseGuards(AppGuard)
-  @Public()
-  @Get('getChat/:ownerId')
-  async getChatById(@Param('ownerId') ownerId: string) {
-    const chat = await this.chatService.getChatById(ownerId);
-    return { statusCode: HttpStatus.OK, data: chat };
+  @Get('getChat')
+  async getChatById(@Req() request: Request): Promise<ChatResponseDTO> {
+    try {
+      const user = request['user'];
+      console.log({ user });
+
+      const chat = await this.chatService.getChat(user?.sub);
+      return chat;
+    } catch (error) {
+      console.log('getChatById error', error);
+      throw Exception.HTTPException(
+        ErrorType.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
+      );
+    }
   }
   @Public()
   @Post('update/:ownerId')

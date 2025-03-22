@@ -5,7 +5,7 @@ export class ChatRequestDTO {
 }
 
 export class ChatResponseDTO {
-  ownerId: string;
+  email: string;
   messages: Message[];
 }
 

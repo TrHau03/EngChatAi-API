@@ -16,11 +16,11 @@ export class AuthController {
       console.log({ token });
       return token;
     } catch (error) {
-      console.log(error);
+      console.log('login error', error);
     }
   }
   @Public()
-  @Post('refresh')
+  @Get('refresh')
   async refresh(@Body('refresh_token') refreshToken: string) {
     return this.authService.refreshToken(refreshToken);
   }

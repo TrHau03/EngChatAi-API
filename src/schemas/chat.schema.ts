@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { Message } from 'src/entities/message';
 
 export type ChatDocument = Chat & Document;
@@ -7,20 +7,9 @@ export type ChatDocument = Chat & Document;
 @Schema()
 export class Chat {
   @Prop({ required: true })
-  ownerId: string;
+  email: string;
 
-  @Prop({
-    type: [
-      {
-        _id: { type: Types.ObjectId, auto: true },
-        role: String,
-        content: String,
-        content_translated: String,
-        created_at: { type: Date, default: Date.now },
-      },
-    ],
-    default: [],
-  })
+  @Prop()
   messages: Message[];
 }
 
