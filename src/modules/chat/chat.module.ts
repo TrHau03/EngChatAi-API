@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Chat, ChatSchema } from 'src/schemas/chat.schema';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
-import { ChatController } from './chat.controller';
 
 @Module({
   imports: [
