@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Public } from 'src/decorator/public.decorator';
-import { AuthGuard } from '../auth/auth.guard';
+import { AppGuard } from 'src/guards/app.guard';
 import { ChatService } from './chat.service';
 import { ChatUpdateRequestDTO } from './dto/chat';
 
@@ -17,7 +17,7 @@ import { ChatUpdateRequestDTO } from './dto/chat';
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AppGuard)
   @Public()
   @Get('getChat/:ownerId')
   async getChatById(@Param('ownerId') ownerId: string) {

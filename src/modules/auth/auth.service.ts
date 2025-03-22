@@ -15,13 +15,8 @@ export class AuthService {
   async signIn({ idToken }: LoginRequestDTO): Promise<LoginResponseDTO> {
     try {
       const email = await this.verifyToken(idToken);
-      console.log({ email });
-
       if (!email) {
-        return {
-          access_token: '',
-          refresh_token: '',
-        };
+        throw Exception.HTTPException(ErrorType.NOT_FOUND, ErrorCode.NOT_FOUND);
       }
       const user = await this.userService.findUserByEmail(email!);
       if (!user) {
@@ -29,7 +24,6 @@ export class AuthService {
       }
       const access_token = await this.generateAccessToken(email!);
       const refresh_token = await this.generateRefreshToken(email!);
-
       return {
         access_token,
         refresh_token,
@@ -48,6 +42,21 @@ export class AuthService {
       const decode = await admin.auth().verifyIdToken(token);
       return decode.email;
     } catch (error) {
+      throw Exception.HTTPException(
+        ErrorType.UNAUTHORIZED,
+        ErrorCode.UNAUTHORIZED,
+      );
+    }
+  }
+
+  async verifyRefreshToken(token: string) {
+    try {
+      const decode = await this.jwtService.verifyAsync(token, {
+        secret: config.JWT_SECRET,
+      });
+      return decode.email;
+    } catch (error) {
+      console.log(error);
       throw Exception.HTTPException(
         ErrorType.UNAUTHORIZED,
         ErrorCode.UNAUTHORIZED,
@@ -85,7 +94,7 @@ export class AuthService {
       });
       const newAccessToken = this.jwtService.sign(
         { sub: payload.sub, username: payload.username },
-        { secret: config.JWT_SECRET, expiresIn: '60s' },
+        { secret: config.JWT_SECRET, expiresIn: '2h' },
       );
 
       return { access_token: newAccessToken };

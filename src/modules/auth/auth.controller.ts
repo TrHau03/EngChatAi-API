@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AppGuard } from 'src/guards/app.guard';
 import { Public } from '../../decorator/public.decorator';
-import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LoginRequestDTO } from './dto/login';
 
@@ -25,7 +25,7 @@ export class AuthController {
     return this.authService.refreshToken(refreshToken);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AppGuard)
   @Get('profile')
   getProfile(@Req() request: Request) {
     return { message: 'User info', user: request['user'] };
