@@ -6,9 +6,14 @@ export class ChatRequestDTO {
 
 export class ChatResponseDTO {
   email: string;
-  messages: Message[];
+  data: {
+    title: string;
+    messages: Message[];
+  }[];
 }
 
 export class ChatUpdateRequestDTO {
+  _id: string;
+  title: string;
   messages: Message[];
 }

@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Post,
   Req,
@@ -24,8 +23,6 @@ export class ChatController {
   async getChatById(@Req() request: Request): Promise<ChatResponseDTO> {
     try {
       const user = request['user'];
-      console.log({ user });
-
       const chat = await this.chatService.getChat(user?.sub);
       return chat;
     } catch (error) {
@@ -36,20 +33,31 @@ export class ChatController {
       );
     }
   }
-  @Public()
-  @Post('update/:ownerId')
+  @UseGuards(AppGuard)
+  @Post('updateChat')
   async chatUpdate(
-    @Param('ownerId') ownerId: string,
+    @Req() request: Request,
     @Body() body: ChatUpdateRequestDTO,
   ) {
-    const updatedChat = await this.chatService.updateChatById(ownerId, body);
-    return { statusCode: HttpStatus.OK, data: updatedChat };
+    const user = request['user'];
+    const updatedChat = await this.chatService.updateChat(user?.sub, body);
+    return updatedChat;
   }
-  @Public()
-  @Delete('delete/:ownerId')
-  async deleteChat(@Param('ownerId') ownerId: string) {
-    await this.chatService.deleteChatByOwnerId(ownerId);
-    return { statusCode: HttpStatus.OK, message: 'Chat deleted successfully' };
+
+  @UseGuards(AppGuard)
+  @Delete('deleteChat/:id')
+  async deleteChat(@Req() request: Request, @Param('id') id: string) {
+    try {
+      const user = request['user'];
+      const deletedChat = await this.chatService.deleteChat(user?.sub, id);
+      return deletedChat;
+    } catch (error) {
+      console.log('deleteChat error', error);
+      throw Exception.HTTPException(
+        ErrorType.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
+      );
+    }
   }
   @Public()
   @Delete('deletemsg/:ownerId/message/:messageId')

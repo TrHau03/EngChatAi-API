@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { ErrorCode, ErrorType } from 'src/errors';
+import { ErrorCode, ErrorType, Exception } from 'src/errors';
 import { Chat, ChatDocument } from 'src/schemas/chat.schema';
 import { ChatResponseDTO, ChatUpdateRequestDTO } from './dto/chat';
 
@@ -19,50 +19,49 @@ export class ChatService {
       }
       return chat;
     } catch (error) {
-      console.log(error);
+      console.log('getChat error', error);
       throw new HttpException(ErrorType.BAD_GATEWAY, ErrorCode.BAD_GATEWAY);
     }
   }
 
-  async updateChatById(
-    ownerId: string,
-    { messages }: ChatUpdateRequestDTO,
-  ): Promise<ChatUpdateRequestDTO> {
+  async updateChat(
+    email: string,
+    { _id, title, messages }: ChatUpdateRequestDTO,
+  ): Promise<Boolean> {
     try {
-      const updatedMessages = messages.map((msg) => ({
-        ...msg,
-        _id: new Types.ObjectId(),
-        created_at: msg.created_at || new Date(),
-      }));
-
-      const chat = await this.chatModel.findOneAndUpdate(
-        { ownerId },
-        { $push: { messages: { $each: updatedMessages } } },
-        { new: true, upsert: true },
-      );
-
-      return chat;
+      const user = await this.chatModel.findOne({ email });
+      if (!user) {
+        throw Exception.HTTPException(ErrorType.NOT_FOUND, ErrorCode.NOT_FOUND);
+      }
+      user.data.push({ _id, title, messages });
+      await user.save();
+      return true;
     } catch (error) {
       console.error('Error updating chat:', error);
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: ErrorCode.INTERNAL_SERVER,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      throw Exception.HTTPException(
+        ErrorType.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
       );
     }
   }
 
-  async deleteChatByOwnerId(ownerId: string) {
-    const result = await this.chatModel.findOneAndDelete({ ownerId });
-    if (!result) {
-      throw new HttpException(
-        { statusCode: HttpStatus.NOT_FOUND, message: ErrorCode.NOT_FOUND },
-        HttpStatus.NOT_FOUND,
+  async deleteChat(email: string, _id: string): Promise<boolean> {
+    try {
+      const chat = await this.chatModel.findOne({ email });
+      if (!chat) {
+        throw Exception.HTTPException(ErrorType.NOT_FOUND, ErrorCode.NOT_FOUND);
+      }
+      console.log({ _id });
+      chat.data = chat.data.filter((item) => item._id !== _id);
+      await chat.save();
+      return true;
+    } catch (error) {
+      console.log('deleteChat error', error);
+      throw Exception.HTTPException(
+        ErrorType.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
       );
     }
-    return { message: 'Chat deleted successfully' };
   }
   async deleteMessageById(ownerId: string, messageId: string) {
     try {

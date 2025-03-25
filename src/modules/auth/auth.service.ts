@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import admin from 'firebase-admin';
-import { config } from 'src/config';
 import { ErrorCode, ErrorType, Exception } from 'src/errors';
 import { UsersService } from '../users/user.service';
 import { LoginRequestDTO, LoginResponseDTO } from './dto/login';
@@ -49,27 +48,12 @@ export class AuthService {
     }
   }
 
-  async verifyRefreshToken(token: string) {
-    try {
-      const decode = await this.jwtService.verifyAsync(token, {
-        secret: config.JWT_SECRET,
-      });
-      return decode.email;
-    } catch (error) {
-      console.log(error);
-      throw Exception.HTTPException(
-        ErrorType.UNAUTHORIZED,
-        ErrorCode.UNAUTHORIZED,
-      );
-    }
-  }
-
   generateAccessToken(email: string): Promise<string> {
     return this.jwtService.signAsync(
       { sub: email },
       {
         secret: process.env.JWT_SECRET,
-        expiresIn: '60s',
+        expiresIn: '2h',
         privateKey: process.env.JWT_SECRET,
       },
     );
@@ -81,27 +65,27 @@ export class AuthService {
         sub: email,
       },
       {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '30d',
-        privateKey: process.env.JWT_SECRET,
+        privateKey: process.env.JWT_REFRESH_SECRET,
       },
     );
   }
   async refreshToken(refreshToken: string) {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: config.JWT_REFRESH_SECRET,
+        secret: process.env.JWT_REFRESH_SECRET,
       });
       const newAccessToken = this.jwtService.sign(
-        { sub: payload.sub, username: payload.username },
-        { secret: config.JWT_SECRET, expiresIn: '2h' },
+        { sub: payload.sub },
+        { secret: process.env.JWT_SECRET, expiresIn: '2h' },
       );
 
       return { access_token: newAccessToken };
     } catch (error) {
       throw Exception.HTTPException(
-        ErrorType.UNAUTHORIZED,
-        ErrorCode.UNAUTHORIZED,
+        ErrorType.SERVICE_UNAVAILABLE,
+        ErrorCode.SERVICE_UNAVAILABLE,
       );
     }
   }
