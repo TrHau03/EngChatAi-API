@@ -8,10 +8,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install the application dependencies
+COPY . .
 RUN npm install
 
 # Copy the rest of the application files
-COPY . .
 
 # Build the NestJS application
 RUN npm run build

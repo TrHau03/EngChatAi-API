@@ -1,93 +1,92 @@
-import * as admin from 'firebase-admin';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import admin from 'firebase-admin';
+import { ErrorCode, ErrorType, Exception } from 'src/errors';
 import { UsersService } from '../users/user.service';
-import { config } from 'src/config';
-
+import { LoginRequestDTO, LoginResponseDTO } from './dto/login';
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService,
-    private usersService: UsersService,
-  ) {
-    const firebaseCredentialsPath = this.configService.get<string>('FIREBASE_CREDENTIALS');
+    private userService: UsersService,
+  ) {}
 
+  async signIn({ idToken }: LoginRequestDTO): Promise<LoginResponseDTO> {
     try {
-      if (!firebaseCredentialsPath) {
-        throw new Error('FIREBASE_CREDENTIALS is not defined in environment variables');
+      const email = await this.verifyToken(idToken);
+      if (!email) {
+        throw Exception.HTTPException(ErrorType.NOT_FOUND, ErrorCode.NOT_FOUND);
       }
-
-      const fileContent = fs.readFileSync(firebaseCredentialsPath, 'utf8');
-      const serviceAccount = JSON.parse(fileContent);
-
-      if (!admin.apps.length) {
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
-        });
-        console.log('Firebase Admin Initialized Successfully');
+      const user = await this.userService.findUserByEmail(email!);
+      if (!user) {
+        await this.userService.createUser(email!);
       }
+      const access_token = await this.generateAccessToken(email!);
+      const refresh_token = await this.generateRefreshToken(email!);
+      return {
+        access_token,
+        refresh_token,
+      };
     } catch (error) {
-      console.error('Error initializing Firebase Admin:', error.message);
+      console.log(error);
+      throw Exception.HTTPException(
+        ErrorType.UNAUTHORIZED,
+        ErrorCode.UNAUTHORIZED,
+      );
     }
   }
 
-  async verifyToken(idToken: string) {
-    console.log('🔍 Token nhận được:', idToken);
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    return decodedToken;
-  }
-
-  async signIn({ username, password }: { username: string; password: string }) {
-    const user = await this.usersService.validateUser(username, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+  async verifyToken(token: string) {
+    try {
+      const decode = await admin.auth().verifyIdToken(token);
+      return decode.email;
+    } catch (error) {
+      throw Exception.HTTPException(
+        ErrorType.UNAUTHORIZED,
+        ErrorCode.UNAUTHORIZED,
+      );
     }
-
-    
-    const access_token = this.generateAccessToken(user._id, user.username);
-    const refresh_token = this.generateRefreshToken(user._id, user.username);
-
-    
-    await this.usersService.updateRefreshToken(user._id, refresh_token);
-
-    return { access_token, refresh_token };
   }
 
-  generateAccessToken(userId: string, username: string): string {
-    return this.jwtService.sign(
-      { sub: userId, username },
-      { secret: config.JWT_SECRET, expiresIn: '60s' }
+  generateAccessToken(email: string): Promise<string> {
+    return this.jwtService.signAsync(
+      { sub: email },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '2h',
+        privateKey: process.env.JWT_SECRET,
+      },
     );
   }
 
-  generateRefreshToken(userId: string,username: string): string {
-    return this.jwtService.sign(
-      { sub: userId, username  },
-      { secret: config.JWT_REFRESH_SECRET, expiresIn: '120s' }
+  generateRefreshToken(email: string): Promise<string> {
+    return this.jwtService.signAsync(
+      {
+        sub: email,
+      },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '30d',
+        privateKey: process.env.JWT_REFRESH_SECRET,
+      },
     );
   }
   async refreshToken(refreshToken: string) {
     try {
-        const payload = await this.jwtService.verifyAsync(refreshToken, {
-            secret: config.JWT_REFRESH_SECRET,
-        });
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+      const newAccessToken = this.jwtService.sign(
+        { sub: payload.sub },
+        { secret: process.env.JWT_SECRET, expiresIn: '2h' },
+      );
 
-        // Tạo access token mới có username
-        const newAccessToken = this.jwtService.sign(
-            { sub: payload.sub, username: payload.username }, 
-            { secret: config.JWT_SECRET, expiresIn: '60s' }
-        );
-
-        return { access_token: newAccessToken };
+      return { access_token: newAccessToken };
     } catch (error) {
-        throw new UnauthorizedException('Invalid or expired refresh token');
+      throw Exception.HTTPException(
+        ErrorType.SERVICE_UNAVAILABLE,
+        ErrorCode.SERVICE_UNAVAILABLE,
+      );
     }
-}
-
-  generateJwt(payload: { uid: string; email: string; name: string }) {
-    return this.jwtService.sign(payload);
   }
 }

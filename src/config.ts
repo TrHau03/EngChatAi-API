@@ -7,7 +7,6 @@ class Config {
   public FIREBASE_CREDENTIALS: string | undefined;
   public JWT_SECRET: string | undefined;
   public JWT_REFRESH_SECRET: string | undefined;
-  
 
   constructor() {
     this.MONGO_URL = process.env.MONGO_URL || '';

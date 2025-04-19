@@ -1,54 +1,33 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AppGuard } from 'src/guards/app.guard';
 import { Public } from '../../decorator/public.decorator';
+import { AuthService } from './auth.service';
+import { LoginRequestDTO } from './dto/login';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService
-  ) {}
+  constructor(private authService: AuthService) {}
 
-@Public()
-@HttpCode(HttpStatus.OK)
-@Post('login')
-  async signIn(@Body() signInDto: { username: string; password: string }) {
-    return this.authService.signIn(signInDto);
-}
-@Public()
-@Post('refresh')
-async refresh(@Body('refresh_token') refreshToken: string) {
+  @Post('login')
+  async signIn(@Body() signInDto: LoginRequestDTO) {
+    try {
+      console.log({ signInDto });
+      const token = await this.authService.signIn(signInDto);
+      console.log({ token });
+      return token;
+    } catch (error) {
+      console.log('login error', error);
+    }
+  }
+  @Public()
+  @Get('refresh')
+  async refresh(@Body('refresh_token') refreshToken: string) {
     return this.authService.refreshToken(refreshToken);
-}
-@Post('firebase-login')
-  async firebaselogin(@Body('token') token: string) {
-    const decodedToken = await this.authService.verifyToken(token);
-
-    const payload = {
-        uid: decodedToken.uid,
-        email: decodedToken.email || 'no-email@example.com',
-        name: decodedToken.displayName || decodedToken.email || 'Unknown User', 
-        picture: decodedToken.picture || null, 
-    };
-
-    const jwt = this.authService.generateJwt(payload);
-    return { jwt, user: payload };
   }
 
-@UseGuards(AuthGuard)
-@Get('profile')
-getProfile(@Req() request: Request) {
+  @UseGuards(AppGuard)
+  @Get('profile')
+  getProfile(@Req() request: Request) {
     return { message: 'User info', user: request['user'] };
   }
 }
-
-

@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from 'src/modules/users/user.module';
-import { AuthGuard } from './auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),  
+    ConfigModule.forRoot(),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
@@ -18,12 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-    AuthService, JwtModule],
-  exports: [AuthService,JwtModule],  
+  providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}
