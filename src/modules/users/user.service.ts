@@ -25,4 +25,8 @@ export class UsersService {
       return null;
     }
   }
+
+  async findOneByUsername(username: string): Promise<User | null> {
+    return this.userModel.findOne({ username }).exec();
+  }
 }
