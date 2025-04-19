@@ -9,6 +9,7 @@ import { QuestionController } from './modules/question/question.controller';
 import { QuestionModule } from './modules/question/question.module';
 import { QuestionService } from './modules/question/question.service';
 import { TopicModule } from './modules/topic/topic.module';
+import { UsersModule } from './modules/users/user.module';
 import { WordsByTopicModule } from './modules/words-by-topic/words-by-topic.module';
 import { WordsModule } from './modules/words/words.module';
 
@@ -23,6 +24,7 @@ import { WordsModule } from './modules/words/words.module';
     PodcastModule,
     WordsByTopicModule,
     QuestionModule,
+    UsersModule,
   ],
   controllers: [QuestionController],
   providers: [QuestionService],
