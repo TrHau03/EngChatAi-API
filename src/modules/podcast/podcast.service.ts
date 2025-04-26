@@ -11,9 +11,30 @@ export class PodcastService {
     @InjectModel(Podcast.name) private podcastModel: Model<PodcastDocument>,
   ) {}
 
-  async getAllPodcasts(): Promise<GetAllPodcastsRes[]> {
+  async getAllPodcasts(topic: string): Promise<GetAllPodcastsRes[]> {
     try {
-      const podcast = await this.podcastModel.find().exec();
+      let query = {};
+
+      if (topic) {
+        query = { topic: { $regex: topic, $options: 'i' } };
+      }
+      const podcast = await this.podcastModel
+        .find(query, { title: 1, topic: 1, image: 1 })
+        .exec();
+      return podcast;
+    } catch (error) {
+      throw Exception.HTTPException(
+        ErrorType.INTERNAL_SERVER,
+        ErrorCode.INTERNAL_SERVER,
+      );
+    }
+  }
+  async getPodcast(id: string): Promise<GetAllPodcastsRes> {
+    try {
+      const podcast = await this.podcastModel.findById(id);
+      if (!podcast) {
+        throw Exception.HTTPException(ErrorType.NOT_FOUND, ErrorCode.NOT_FOUND);
+      }
       return podcast;
     } catch (error) {
       throw Exception.HTTPException(
